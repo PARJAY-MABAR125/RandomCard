@@ -1,0 +1,17 @@
+lifecycleScope.launch {
+        try {
+            val response = RetrofitBuilder.pengaduanService.addPengaduan("", "123456", "yes bisa", "", foto)
+            withContext(Dispatchers.Main) {
+                if (response.isSuccessful) {
+                    Toast.makeText(this@ActivityMakePengaduan, response.body(), Toast.LENGTH_LONG)
+                            .show()
+
+                    startActivity(Intent(this@ActivityMakePengaduan, ActivityMasyarakatDashboard::class.java))
+                }
+            }
+        } catch (e: Exception) {
+            withContext(Dispatchers.Main) {
+                Toast.makeText(this@ActivityMakePengaduan, e.message, Toast.LENGTH_LONG)
+                        .show()
+            }
+        }
