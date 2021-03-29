@@ -1,0 +1,14 @@
+php
+$response["value"] = 0;
+       $response["message"] = "oops! Coba lagi!";
+       echo json_encode($response);
+       
+       
+android studio
+class ResponseModel {
+    @SerializedName("pesan")
+    var pesan: String? = null
+}
+
+//java sih
+response.body().getPesan
