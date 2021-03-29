@@ -1,0 +1,61 @@
+private val REQUEST_CODE = 100
+private var part_image = ""
+
+
+AMP_iv_image_pengaduan.setOnClickListener {
+            val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+            startActivityForResult(intent, REQUEST_CODE)
+}
+
+
+AMP_btn_save.setOnClickListener {
+
+    //file
+    val file = File(part_image)
+    val reqBody = RequestBody.create(MediaType.parse("multipart/form-file"), file)
+    val foto = MultipartBody.Part.createFormData("foto", file.name, reqBody)
+
+    lifecycleScope.launch {
+        try {
+            val response = RetrofitBuilder.pengaduanService.addPengaduan("", "123456", "yes bisa", "", foto)
+            withContext(Dispatchers.Main) {
+                if (response.isSuccessful) {
+                    Toast.makeText(this@ActivityMakePengaduan, response.body(), Toast.LENGTH_LONG)
+                            .show()
+
+                    startActivity(Intent(this@ActivityMakePengaduan, ActivityMasyarakatDashboard::class.java))
+                }
+            }
+        } catch (e: Exception) {
+            withContext(Dispatchers.Main) {
+                Toast.makeText(this@ActivityMakePengaduan, e.message, Toast.LENGTH_LONG)
+                        .show()
+            }
+        }
+    }
+
+}
+        
+        
+        override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (resultCode == Activity.RESULT_OK && requestCode == REQUEST_CODE){
+
+            val dataImage = data?.data
+            val imageArray = arrayOf(MediaStore.Images.Media.DATA)
+            val cursor = contentResolver.query(dataImage!!, imageArray, null, null, null)
+
+            if (cursor != null) {
+                cursor.moveToFirst()
+                val indexImage = cursor.getColumnIndex(imageArray[0])
+                part_image = cursor.getString(indexImage)
+            }
+
+            Glide.with(this)
+                .load(data.data)
+                .override(140, 160)
+                .centerCrop()
+                .into(AMP_iv_image_pengaduan)
+        }
+    }
