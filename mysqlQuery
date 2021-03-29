@@ -1,0 +1,1 @@
+SELECT status, COUNT(*) AS Total FROM tb_pengaduan WHERE tgl_pengaduan BETWEEN INPUT1 AND INPUT2 GROUP BY status
