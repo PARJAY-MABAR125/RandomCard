@@ -1,0 +1,58 @@
+//class TampilSemuaPgwAdapter(private val onPegawaiClicked : (pegawaiId : Int?) -> Unit ): RecyclerView.Adapter<TampilSemuaPgwAdapter.PegawaiViewHolder>() {
+    //
+    //    private var item: List<Pegawai> = ArrayList()
+    //    fun setListData(data: ArrayList<Pegawai>) { this.item = data }
+    //
+    //    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PegawaiViewHolder {
+    //        return PegawaiViewHolder(
+    //            LayoutInflater.from(parent.context).inflate(R.layout.list_pegawai, parent, false)
+    //        )
+    //    }
+    //
+    //    override fun onBindViewHolder(holder: PegawaiViewHolder, position: Int) {
+    //        holder.bind(item[position])
+    //    }
+    //
+    //    override fun getItemCount(): Int {
+    //        return item.size
+    //    }
+    //
+    //    inner class PegawaiViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    //        fun bind(pegawai: Pegawai) {
+    //            with(itemView) {
+    //                LP_pgw_id.text = "Id : ${pegawai.id.toString()}"
+    //                LP_pgw_name.text = pegawai.nama
+    //
+    //                setOnClickListener { onPegawaiClicked(pegawai.id) }
+    //            }
+    //        }
+    //    }
+    //}
+
+    // how to use lambda
+    //
+    // in the Button
+    // val onPegawaiClicked: (pegawaiId: Int?) -> Unit = { pegawaiId ->
+    //            startActivity(
+    //                Intent(this, TampilPegawai::class.java)
+    //                    .putExtra(TampilPegawai.EXTRA_ID_PEGAWAI, pegawaiId)
+    //            )
+    //            finish()
+    //        }
+    //
+    //
+    // on the target class
+    // companion object { const val EXTRA_ID_PEGAWAI = "id_pegawai" }
+    //
+    //      // get data
+    // val pegawaiId = intent.getIntExtra(EXTRA_ID_PEGAWAI, -1)
+    //
+    //      //set data
+    // lifecycleScope.launchWhenCreated {
+    //    val pegawai = pegawaiServices.getPegawaiById(pegawaiId).result[0]
+    //
+    //    ATP_et_id_pegawai.hint      = pegawaiId.toString()
+    //    ATP_et_nama_pegawai.setText(pegawai.nama)
+    //    ATP_et_posisi_pegawai.setText(pegawai.posisi)
+    //    ATP_et_gaji_pegawai.setText(pegawai.gaji.toString())
+    // }
