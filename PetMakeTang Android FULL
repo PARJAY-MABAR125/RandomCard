@@ -1,0 +1,211 @@
+// layout 
+
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+
+    android:layout_marginTop="8dp" android:layout_marginBottom="8dp"
+    android:layout_marginLeft="16dp" android:layout_marginRight="16dp"
+
+    android:background="#aaa"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/IP_tv_nik_pengadu"
+
+        android:text="NIK : "
+        android:textSize="24sp"
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/IP_tv_isi_laporan_pengadu"
+
+        android:text="Isi Laporan : "
+
+        android:layout_marginTop="16dp"
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>
+
+// adapter
+class PengaduanAdapter (private val onPengaduanClicked : (pegawaiId : Int?) -> Unit ): RecyclerView.Adapter<PengaduanAdapter.PengaduanViewHolder>() {
+
+    private var item: List<PengaduanFull> = ArrayList()
+    fun setListData(data: ArrayList<PengaduanFull>) { this.item = data }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PengaduanViewHolder {
+        return PengaduanViewHolder(
+            LayoutInflater.from(parent.context).inflate(R.layout.item_pengaduan, parent, false)
+        )
+    }
+
+    override fun onBindViewHolder(holder: PengaduanViewHolder, position: Int) {
+        holder.bind(item[position])
+    }
+
+    override fun getItemCount(): Int {
+        return item.size
+    }
+
+    inner class PengaduanViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        fun bind(pengaduanFull: PengaduanFull) {
+            with(itemView) {
+                IP_tv_nik_pengadu.text          = "NIK : ${pengaduanFull.nik.toString()}"
+                IP_tv_isi_laporan_pengadu.text  = pengaduanFull.isi_laporan
+
+                setOnClickListener { onPengaduanClicked(pengaduanFull.id_pengaduan) }
+            }
+        }
+    }
+}
+
+
+// ITEM PENGADUAN
+
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+
+    android:layout_marginTop="8dp" android:layout_marginBottom="8dp"
+    android:layout_marginLeft="16dp" android:layout_marginRight="16dp"
+
+    android:background="#aaa"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/IP_tv_nik_pengadu"
+
+        android:text="NIK : "
+        android:textSize="24sp"
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/IP_tv_isi_laporan_pengadu"
+
+        android:text="Isi Laporan : "
+
+        android:layout_marginTop="16dp"
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>
+
+// PETUGAS DASHBOARD
+
+class PetugasDashboard : AppCompatActivity() {
+
+    private lateinit var pengaduanAdapter: PengaduanAdapter
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_petugas_dashboard)
+
+        val onPegawaiClicked: (pegawaiId: Int?) -> Unit = { pegawaiId ->
+            startActivity(
+                Intent(this, PetugasMakeTanggapan::class.java)
+                    .putExtra(PetugasMakeTanggapan.EXTRA_ID_PENGADUAN, pegawaiId)
+            )
+            finish()
+        }
+
+        pengaduanAdapter = PengaduanAdapter(onPegawaiClicked)
+
+        with(APD_rv_pengaduan) {
+            adapter = pengaduanAdapter
+            layoutManager = LinearLayoutManager(this@PetugasDashboard)
+        }
+
+        lifecycleScope.launch {
+            pengaduanAdapter.setListData(ArrayList(RetrofitBuilder.pengaduanServices.getAllPengaduan().result))
+            pengaduanAdapter.notifyDataSetChanged()
+        }
+    }
+
+}
+
+// PETUGAS MAKE TANGGAPAN
+
+class PetugasMakeTanggapan : AppCompatActivity() {
+
+    companion object { const val EXTRA_ID_PENGADUAN = "id_pegawai" }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_petugas_make_tanggapan)
+
+        //get data
+        val pengaduanId = intent.getIntExtra(EXTRA_ID_PENGADUAN, -1)
+
+        var id = 0
+        val date = SimpleDateFormat("yyyy-mm-dd").format(Date(Calendar.getInstance().timeInMillis))
+        var nik = ""
+        var foto = ""
+        //set data
+        lifecycleScope.launchWhenCreated {
+            val pengaduanFull = RetrofitBuilder.pengaduanServices.getPengaduanById(pengaduanId).result[0]
+
+            id  = pengaduanFull.id_pengaduan!!
+            nik = pengaduanFull.nik!!.toString()
+            foto = pengaduanFull.foto!!.toString()
+
+            APMT_et_nik.hint            = nik
+            APMT_et_isi_laporan.hint    = pengaduanFull.isi_laporan.toString()
+            APMT_et_link_foto.hint      = pengaduanFull.foto.toString()
+        }
+
+        APMT_btn_submit_tanggapan.setOnClickListener {
+            val isiLaporan = APMT_et_isi_laporan.text.toString()
+
+            lifecycleScope.launch {
+                try {
+                    val response = RetrofitBuilder.pengaduanServices.updatePengaduan( id, date, nik, isiLaporan, foto, "selesai")
+                    withContext(Dispatchers.Main) {
+                        if (response.isSuccessful) {
+                            Toast.makeText(this@PetugasMakeTanggapan, response.body(), Toast.LENGTH_LONG)
+                                .show()
+                        }
+                    }
+                } catch (e: Exception) {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@PetugasMakeTanggapan, e.message, Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+
+            val defaultIdPetugas = 4
+            val tanggapan = APMT_et_telp.text.toString()
+
+            lifecycleScope.launch {
+                try {
+                    val response = RetrofitBuilder.petugasServices.makeTanggapan( id, date, tanggapan, defaultIdPetugas)
+                    withContext(Dispatchers.Main) {
+                        if (response.isSuccessful) {
+                            Toast.makeText(this@PetugasMakeTanggapan, response.body(), Toast.LENGTH_LONG)
+                                .show()
+                        }
+                    }
+                } catch (e: Exception) {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@PetugasMakeTanggapan, e.message, Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+
+        }
+    }
+
+}
+
