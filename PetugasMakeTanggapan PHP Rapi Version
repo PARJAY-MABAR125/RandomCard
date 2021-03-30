@@ -1,0 +1,141 @@
+// list pengaduan php
+
+<?php
+
+//DONE
+
+require_once '../koneksi.php';
+
+// curl -X POST http://192.168.43.221/AplikasiPengaduanMasyarakat/pengaduan/ListPengaduan.php
+$query = mysqli_query($con, "SELECT * FROM `tb_pengaduan`");
+
+$result = array();
+
+// Mengambil data
+while ( $row = mysqli_fetch_array($query) ) {
+    array_push($result, array(
+        "id_pengaduan"  => $row['id_pengaduan'],
+        "tgl_pengaduan" => $row['tgl_pengaduan'],
+        "nik"           => $row['nik'],
+        "isi_laporan"   => $row['isi_laporan'],
+        "foto"          => $row['foto'],
+        "status"        => $row['status']
+    ));
+}
+
+echo json_encode(array('result' => $result));
+
+
+?>
+
+
+// get pengaduan by id php
+
+<?php
+
+//DONE
+
+$id = $_GET['id'];
+
+    // Importing database
+    require_once('../koneksi.php');
+
+    // http://192.168.43.221/AplikasiPengaduanMasyarakat/pengaduan/GetPengaduanById.php?1
+
+    // SQL query
+    $sql = "SELECT * FROM tb_pengaduan WHERE id_pengaduan=$id";
+
+    // Mendapatkan Hasil
+    $r = mysqli_query($con, $sql);
+
+    // Memasukkan Hasil Kedalam Array
+    $result = array();
+    $row = mysqli_fetch_array($r);
+    array_push($result, array(
+        "id_pengaduan"  => $row['id_pengaduan'],
+        "tgl_pengaduan" => $row['tgl_pengaduan'],
+        "nik"           => $row['nik'],
+        "isi_laporan"   => $row['isi_laporan'],
+        "foto"          => $row['foto'],
+        "status"        => $row['status']
+    ));
+
+    echo json_encode(array('result' => $result));
+    mysqli_close($con);
+
+?>
+
+//edit pengaduan (cumak statusnya aja kok) php
+<?php 
+
+//DONE
+
+//LOW PRIORITY
+
+require_once '../koneksi.php';
+
+//curl -X POST -F id_pengaduan="18" -F tgl_pengaduan="2021-03-01" -F nik="bisa gitu" -F isi_laporan="gitu dong jadi pemerintah" -F foto="image/banggaJadiWNI" -F status="selesai" http://192.168.43.221/AplikasiPengaduanMasyarakat/pengaduan/EditPengaduan.php
+if ($_POST > 0) {
+
+    $id_pengaduan   = $_POST['id_pengaduan'];
+    $tgl_pengaduan  = $_POST['tgl_pengaduan'];
+    $nik            = $_POST['nik'];
+    $isi_laporan    = $_POST['isi_laporan'];
+    $foto           = $_POST['foto'];
+    $status         = $_POST['status']; //"status:'selesai'"
+
+    $sql = "UPDATE tb_pengaduan SET 
+        tgl_pengaduan       = '$tgl_pengaduan',
+        nik                 = '$nik',
+        isi_laporan         = '$isi_laporan',
+        foto                = '$foto',
+        status              = '$status'
+        WHERE id_pengaduan  = '$id_pengaduan'";
+    
+    if (mysqli_query($con, $sql)) {
+        echo json_encode("Data Berhasil Diupdate");
+    } else {
+        echo json_encode("Data Gagal Diupdate");
+    }
+} else {
+    echo json_encode("ERROR : NO POST Method");
+}
+
+
+?>
+
+
+// petugas make tanggapan php
+
+<?php
+
+// DONE
+// CATATAN : DATABASE ONE -IN ONE RELATION
+// HIGH PRIORITY
+
+require_once('../koneksi.php');
+
+// curl -X POST -F id_pengaduan="5" -F tgl_tanggapan="2021-03-03" -F tanggapan="biarin ajalah bambang" -F id_petugas="1" http://192.168.43.221/AplikasiPengaduanMasyarakat/petugas/MakeTanggapan.php
+if ($_POST > 0) {
+
+    $id_pengaduan  = $_POST['id_pengaduan'];
+    $tgl_tanggapan = $_POST['tgl_tanggapan'];
+    $tanggapan     = $_POST['tanggapan'];
+    $id_petugas    = $_POST['id_petugas'];
+
+    $result = mysqli_query($con, "INSERT INTO tb_tanggapan 
+    ( id_tanggapan, id_pengaduan, tgl_tanggapan, tanggapan, id_petugas )
+    VALUE ( '', '$id_pengaduan', '$tgl_tanggapan', '$tanggapan', '$id_petugas' )" );
+    
+    if (mysqli_affected_rows($con) > 0) {
+        echo json_encode("Parjay Mabar");
+        exit;
+    } else {
+        echo json_encode("Data sudah digunakan");
+    }
+} else {
+    echo json_encode("ERROR");
+}
+
+?>
+
