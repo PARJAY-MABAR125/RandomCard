@@ -1,0 +1,164 @@
+// generate laporan php 
+
+<?php 
+
+//DONE
+
+require_once '../koneksi.php';
+
+if ( $_POST > 0 ) {
+    $from = $_POST['from'];
+    $to   = $_POST['to'];
+
+    // curl -X POST -F from="2021-01-01" -F to="2021-03-03" http://192.168.43.221/AplikasiPengaduanMasyarakat/petugas/GenerateLaporan.php
+    $query = mysqli_query($con, "SELECT status, COUNT(*) as total FROM `tb_pengaduan` WHERE tgl_pengaduan BETWEEN '$from' AND '$to' GROUP BY status");
+
+    $result = array();
+
+    // Mengambil data
+    while ( $row = mysqli_fetch_array($query) ) {
+        array_push($result, array(
+            "status"    => $row['status'],
+            "total"     => $row['total']   
+        ));
+    }
+
+    echo json_encode(array('result' => $result));
+
+}
+
+?>
+
+// PETUGAS SERVICE android studio
+
+@FormUrlEncoded
+    @POST("pengaduan/.php")
+    suspend fun generateLaporan(
+        @Field("from")  from    : String?,
+        @Field("to")    to      : String?
+    ) : Response<String>
+
+
+// DATA CLASS LIST
+data class GenerateLaporanFullList(val result : List<GenerateLaporanFull>)
+
+// DATA CLASS 
+data class GenerateLaporanFull(
+    @SerializedName("status")   val status  : String?,
+    @SerializedName("total")    val total   : String?
+)
+
+
+// ADAPTER
+
+class GenerateLaporanAdapter: RecyclerView.Adapter<GenerateLaporanAdapter.GenerateLaporanViewHolder>() {
+
+    private var item: List<GenerateLaporanFull> = ArrayList()
+    fun setListData(data: ArrayList<GenerateLaporanFull>) { this.item = data }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GenerateLaporanViewHolder {
+        return GenerateLaporanViewHolder(
+            LayoutInflater.from(parent.context).inflate(R.layout.item_pengaduan, parent, false)
+        )
+    }
+
+    override fun onBindViewHolder(holder: GenerateLaporanViewHolder, position: Int) {
+        holder.bind(item[position])
+    }
+
+    override fun getItemCount(): Int {
+        return item.size
+    }
+
+    inner class GenerateLaporanViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        fun bind(generateLaporanFull: GenerateLaporanFull) {
+            with(itemView) {
+                IP_tv_nik_pengadu.text          = generateLaporanFull.status
+                IP_tv_isi_laporan_pengadu.text  = generateLaporanFull.total
+            }
+        }
+    }
+}
+
+// ITEM LAYOUT
+
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+
+    android:padding="20dp">
+
+    <TextView
+        android:id="@+id/IGL_tv_status"
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:text="Status"
+        android:textSize="18sp"
+
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/IGL_tv_total"
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:text="Total"
+        android:textSize="18sp"
+
+        android:layout_marginLeft="24dp"
+
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/IGL_tv_status" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+// CLASS VIEW
+
+class PetugasGenerateLaporan : AppCompatActivity() {
+
+    private lateinit var generateLaporanAdapter: GenerateLaporanAdapter
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_petugas_generate_laporan)
+
+        generateLaporanAdapter = GenerateLaporanAdapter()
+
+        var from = ""
+        var to   = ""
+        val datePicker = MaterialDatePicker.Builder.dateRangePicker().build()
+        datePicker.addOnPositiveButtonClickListener {
+            from = SimpleDateFormat("yyyy-mm-dd").format(Date(it.first!!))
+            to = SimpleDateFormat("yyyy-mm-dd").format(Date(it.second!!))
+        }
+
+        APGL_btn_date_picker.setOnClickListener {
+            datePicker.show(supportFragmentManager, "Bebas")
+            APGL_tv_date.text = "$from - $to"
+        }
+
+        APGL_btn_generate.setOnClickListener {
+            with(APD_rv_pengaduan) {
+                adapter = generateLaporanAdapter
+                layoutManager = LinearLayoutManager(this@PetugasGenerateLaporan)
+            }
+
+            lifecycleScope.launch {
+                generateLaporanAdapter.setListData(ArrayList(RetrofitBuilder.petugasServices.generateLaporan(from, to).result))
+                generateLaporanAdapter.notifyDataSetChanged()
+            }
+        }
+    }
+
+}
