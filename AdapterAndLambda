@@ -119,3 +119,8 @@ with(ATSP_lv_pegawai) {
 
     ) : Response<String>
     
+    tampilSemuaPgwAdapter = TampilSemuaPgwAdapter(onPegawaiClicked)
+    
+    private lateinit var tampilSemuaPgwAdapter: TampilSemuaPgwAdapter
+    
+    tampilSemuaPgwAdapter = TampilSemuaPgwAdapter(onPegawaiClicked)
