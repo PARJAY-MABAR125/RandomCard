@@ -1,0 +1,5 @@
+SELECT status, COUNT(*) AS Total FROM tb_pengaduan WHERE tgl_pengaduan BETWEEN INPUT1 AND INPUT2 GROUP BY status
+
+
+//update query most likely
+UPDATE tb_pegawai SET nama = '$nama', posisi = '$desg', gaji = '$salary' WHERE id = $id
