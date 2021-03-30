@@ -56,3 +56,12 @@
     //    ATP_et_posisi_pegawai.setText(pegawai.posisi)
     //    ATP_et_gaji_pegawai.setText(pegawai.gaji.toString())
     // }
+    
+ data class PegawaiResult(val result : List<Pegawai>)
+ 
+ data class Pegawai (
+    val id : Int?,
+    @SerializedName("nama")   val nama   : String?,
+    @SerializedName("posisi") val posisi : String?,
+    @SerializedName("gaji")   val gaji   : Int?
+)
