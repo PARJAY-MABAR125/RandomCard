@@ -1,4 +1,4 @@
-// list pengaduan php
+// LIST PENGADUAN php
 
 <?php
 
@@ -29,7 +29,7 @@ echo json_encode(array('result' => $result));
 ?>
 
 
-// get pengaduan by id php
+// GET PENGADUAN BY ID php
 
 <?php
 
@@ -65,7 +65,9 @@ $id = $_GET['id'];
 
 ?>
 
-//edit pengaduan (cumak statusnya aja kok) php
+//EDIT PENGADUAN (cumak statusnya aja kok) php
+
+
 <?php 
 
 //DONE
@@ -105,7 +107,7 @@ if ($_POST > 0) {
 ?>
 
 
-// petugas make tanggapan php
+// PETUGAS MAKE TANGGAPAN php
 
 <?php
 
