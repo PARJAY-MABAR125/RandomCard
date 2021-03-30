@@ -1,0 +1,50 @@
+//date picker
+
+val x = Calendar.getInstance().timeInMillis
+
+ACK_btn_get_time_now.setOnClickListener {
+    ACK_tv_time_now.text = SimpleDateFormat("yyyy-mm-dd").format(Date(x))
+}
+
+var from = ""
+var to   = ""
+
+val datePicker = MaterialDatePicker.Builder.dateRangePicker().build()
+datePicker.addOnPositiveButtonClickListener {
+    from = SimpleDateFormat("YYYY-MM-DD").format(Date(it.first!!))
+    to   = SimpleDateFormat("YYYY-MM-DD").format(Date(it.second!!))
+}
+
+ACK_tv_date_range.setOnClickListener {
+    datePicker.show(supportFragmentManager, "Bebas")
+    ACK_tv_date_range.text = "$from - $to"
+}
+
+// date picker end
+
+
+// service
+@GET(url)
+suspend fun generateLaporan(
+    @Field("from") from  : String?,
+    @Field("to")   to    : String?
+) : GenerateLaporanList
+
+// the class
+with(ATSP_lv_pegawai) {
+  adapter = tampilSemuaPgwAdapter
+  layoutManager = LinearLayoutManager(this@TampilSemuaPegawai)
+}
+
+//
+val datePicker = MaterialDatePicker.Builder.dateRangePicker().build()
+datePicker.addOnPositiveButtonClickListener {
+    from = SimpleDateFormat("yyyy-mm-dd").format(Date(it.first!!))
+    to   = SimpleDateFormat("yyyy-mm-dd").format(Date(it.second!!))
+}
+
+
+lifecycleScope.launch {
+  adapterClass.setListData(ArrayList(RetrofitBuilder.petugasService.generateLaporan(from, to).result))
+  adapterClass.notifyDataSetChanged()
+}
