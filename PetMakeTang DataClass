@@ -1,0 +1,13 @@
+
+
+data class PengaduanFullList(val result : List<PengaduanFull>)
+
+
+data class PengaduanFull (
+                                     val id_pengaduan   : Int?,
+    @SerializedName("tgl_pengaduan") val tgl_pengaduan  : String?,
+    @SerializedName("nik")           val nik            : String?,
+    @SerializedName("isi_laporan")   val isi_laporan    : String?,
+    @SerializedName("foto")          val foto           : String?,
+    @SerializedName("status")        val status         : String?
+)
