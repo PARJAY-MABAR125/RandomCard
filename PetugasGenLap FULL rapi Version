@@ -32,7 +32,7 @@ if ( $_POST > 0 ) {
 // PETUGAS SERVICE android studio
 
 @FormUrlEncoded
-    @POST("pengaduan/.php")
+    @POST(petugas/GenerateLaporan.php)
     suspend fun generateLaporan(
         @Field("from")  from    : String?,
         @Field("to")    to      : String?
@@ -58,7 +58,7 @@ class GenerateLaporanAdapter: RecyclerView.Adapter<GenerateLaporanAdapter.Genera
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GenerateLaporanViewHolder {
         return GenerateLaporanViewHolder(
-            LayoutInflater.from(parent.context).inflate(R.layout.item_pengaduan, parent, false)
+            LayoutInflater.from(parent.context).inflate(R.layout.item_generate_laporan, parent, false)
         )
     }
 
@@ -73,8 +73,8 @@ class GenerateLaporanAdapter: RecyclerView.Adapter<GenerateLaporanAdapter.Genera
     inner class GenerateLaporanViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         fun bind(generateLaporanFull: GenerateLaporanFull) {
             with(itemView) {
-                IP_tv_nik_pengadu.text          = generateLaporanFull.status
-                IP_tv_isi_laporan_pengadu.text  = generateLaporanFull.total
+                IGL_tv_status.text = generateLaporanFull.status
+                IGL_tv_total.text  = generateLaporanFull.total
             }
         }
     }
@@ -139,8 +139,8 @@ class PetugasGenerateLaporan : AppCompatActivity() {
         var to   = ""
         val datePicker = MaterialDatePicker.Builder.dateRangePicker().build()
         datePicker.addOnPositiveButtonClickListener {
-            from = SimpleDateFormat("yyyy-mm-dd").format(Date(it.first!!))
-            to = SimpleDateFormat("yyyy-mm-dd").format(Date(it.second!!))
+            from = SimpleDateFormat("yyyy-MM-dd").format(Date(it.first!!))
+            to = SimpleDateFormat("yyyy-MM-dd").format(Date(it.second!!))
         }
 
         APGL_btn_date_picker.setOnClickListener {
@@ -148,12 +148,14 @@ class PetugasGenerateLaporan : AppCompatActivity() {
             APGL_tv_date.text = "$from - $to"
         }
 
-        APGL_btn_generate.setOnClickListener {
-            with(APD_rv_pengaduan) {
-                adapter = generateLaporanAdapter
-                layoutManager = LinearLayoutManager(this@PetugasGenerateLaporan)
-            }
+        with(APGL_rv_laporan) {
+            adapter = generateLaporanAdapter
+            layoutManager = LinearLayoutManager(this@PetugasGenerateLaporan)
+        }
 
+        APGL_btn_generate.setOnClickListener {
+            val manualFom   = "2021-01-01"
+            val manualTo    = "2021-03-31"
             lifecycleScope.launch {
                 generateLaporanAdapter.setListData(ArrayList(RetrofitBuilder.petugasServices.generateLaporan(from, to).result))
                 generateLaporanAdapter.notifyDataSetChanged()
