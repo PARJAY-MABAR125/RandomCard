@@ -65,3 +65,57 @@
     @SerializedName("posisi") val posisi : String?,
     @SerializedName("gaji")   val gaji   : Int?
 )
+
+
+php - select semua
+
+<?php 
+    // Importing database
+    require_once('koneksi.php');
+
+    // SQL query
+    $sql = "SELECT * FROM tb_pegawai";
+
+    $r = mysqli_query($con, $sql);
+    $result = array();
+
+    // Mengambil data
+    while ($row = mysqli_fetch_array($r)) {
+        array_push($result, array(
+            "id"    => $row['id'],
+            "nama"  => $row['nama']
+        ));
+    }
+
+    echo json_encode(array('result' => $result));
+    mysqli_close($con);
+?>
+
+// recycler view declaration
+with(ATSP_lv_pegawai) {
+            adapter = tampilSemuaPgwAdapter
+            layoutManager = LinearLayoutManager(this@TampilSemuaPegawai)
+        }
+
+        lifecycleScope.launch {
+            tampilSemuaPgwAdapter.setListData(ArrayList(RetrofitBuilder.pegawaiServices.getAllPegawai().result))
+            tampilSemuaPgwAdapter.notifyDataSetChanged()
+        }
+
+
+// service
+
+    @GET("tampilSemuaPgw.php")
+    suspend fun getAllPegawai() : PegawaiResult
+    
+    
+    // model
+    
+    @Multipart
+    @POST("debug.php")
+    suspend fun addFotoPengaduan(
+
+        @Part foto:MultipartBody.Part
+
+    ) : Response<String>
+    
